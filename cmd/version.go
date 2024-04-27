@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/danesparza/iot-wifi-setup/version"
 
 	"github.com/spf13/cobra"
 )
@@ -9,23 +10,21 @@ import (
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Shows the version of the service",
-	Long:  `Shows the version of the service and exits`,
+	Short: "Shows the version information",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("version called")
+		//	Show the version number
+		fmt.Printf("\niot-wifi-setup version %s\n", version.String())
+
+		//	Show the CommitID if available:
+		if version.CommitID != "" {
+			fmt.Printf(" (%s)", version.CommitID[:7])
+		}
+
+		//	Trailing space and newline
+		fmt.Println(" ")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// versionCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// versionCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
