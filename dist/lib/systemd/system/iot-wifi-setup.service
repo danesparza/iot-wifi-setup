@@ -1,0 +1,12 @@
+[Unit]
+Description=IoT Wifi setup service
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/bin/iot-wifi-setup start --config=/etc/iot-wifi-setup/config.yaml
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

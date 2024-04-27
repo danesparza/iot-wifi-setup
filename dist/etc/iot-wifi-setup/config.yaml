@@ -1,0 +1,7 @@
+server:
+  port: 3070
+  allowed-origins: "*"
+post:
+  #  you can run any command after wifi is setup -
+  #  ... including starting up your service
+  script: /some/script/here

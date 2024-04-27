@@ -1,0 +1,3 @@
+#!/bin/sh
+systemctl enable iot-wifi-setup.service
+systemctl start iot-wifi-setup.service
