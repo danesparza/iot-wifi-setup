@@ -3,7 +3,7 @@ package network
 import "strings"
 
 func parseCliOutput(src string) []string {
-	var fields []string
+	fields := []string{}
 	separator := ':'
 
 	var currentField strings.Builder

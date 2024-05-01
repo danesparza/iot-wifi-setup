@@ -26,6 +26,11 @@ func Test_parseCliOutput(t *testing.T) {
 				"WPA2",
 			},
 		},
+		{
+			name: "Success - empty string",
+			src:  ``,
+			want: []string{""},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
