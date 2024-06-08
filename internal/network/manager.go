@@ -7,10 +7,12 @@ type NetworkManagerService interface {
 	ListAccessPoints() ([]model.AccessPoint, error)
 }
 
-type networkManagerService struct {
-}
+type networkManagerService struct{}
 
+// ListAccessPoints lists the nearby access points
 func (n networkManagerService) ListAccessPoints() ([]model.AccessPoint, error) {
+	// 	sudo nmcli device wifi rescan
+	//	nmcli --terse --fields in-use,bssid,ssid,chan,rate,signal,security dev wifi list
 	//TODO implement me
 	panic("implement me")
 }
