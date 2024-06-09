@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/danesparza/iot-wifi-setup/api"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
+	_ "github.com/danesparza/iot-wifi-setup/docs" // swagger docs location
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -14,6 +12,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 // startCmd represents the start command
@@ -42,9 +41,9 @@ func start(cmd *cobra.Command, args []string) {
 	}
 
 	//	Create an api service object
-	//apiService := api.Service{
-	//	StartTime: time.Now(),
-	//}
+	apiService := api.Service{
+		StartTime: time.Now(),
+	}
 
 	//	Trap program exit appropriately
 	ctx, cancel := context.WithCancel(context.Background())
@@ -52,33 +51,8 @@ func start(cmd *cobra.Command, args []string) {
 	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
 	go handleSignals(ctx, sigs, cancel)
 
-	//	Create a router and set up our REST endpoints...
-	r := chi.NewRouter()
-
-	//	Add middleware
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.Compress(5))
-	r.Use(api.ApiVersionMiddleware)
-
-	//	... including CORS middleware
-	r.Use(cors.Handler(cors.Options{
-		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
-	}))
-
-	r.Route("/", func(r chi.Router) {
-		r.Get("/uitest", api.ShowUI)
-	})
-
-	//	SWAGGER
-	//r.Mount("/swagger", httpSwagger.WrapHandler)
+	//	Set up the API routes
+	r := api.NewRouter(apiService)
 
 	//	Format the bound interface:
 	formattedServerPort := fmt.Sprintf(":%v", viper.GetString("server.port"))

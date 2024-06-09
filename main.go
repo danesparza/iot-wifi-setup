@@ -10,6 +10,14 @@ import (
 	"time"
 )
 
+// @title iot-wifi-setup
+// @version 1.0
+// @description iot-wifi-setup helps get connected to local wifi network then hand-off to your app
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @BasePath /v1
 func main() {
 	//	Set log info:
 	log.Logger = log.With().Timestamp().Caller().Logger()
