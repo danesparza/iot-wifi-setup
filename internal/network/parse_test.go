@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_parseCliOutput(t *testing.T) {
+func Test_parseCliOutputLine(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -34,8 +34,39 @@ func Test_parseCliOutput(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := parseCliOutput(tt.src)
-			assert.Equal(t, tt.want, parseCliOutput(tt.src), "parseCliOutput() = %v, want %v", got, tt.want)
+			got := ParseCliOutputLine(tt.src)
+			assert.Equal(t, tt.want, ParseCliOutputLine(tt.src), "ParseCliOutputLine() = %v, want %v", got, tt.want)
+		})
+	}
+}
+
+func TestParseCliOutput(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name   string
+		output string
+		want   []string
+	}{
+		{
+			name:   "Success - no text = empty slice",
+			output: "",
+			want:   []string{},
+		},
+		{
+			name: "Success - parsed into lines",
+			output: ` :6A\:22\:32\:1D\:24\:E3:Princess_Wifi:153:540 Mbit/s:92:
+*:66\:22\:32\:1D\:24\:E3:Nahual:153:540 Mbit/s:92:WPA2
+ :60\:22\:32\:1D\:24\:E3:Chupacabra:153:540 Mbit/s:92:WPA2`,
+			want: []string{
+				` :6A\:22\:32\:1D\:24\:E3:Princess_Wifi:153:540 Mbit/s:92:`,
+				`*:66\:22\:32\:1D\:24\:E3:Nahual:153:540 Mbit/s:92:WPA2`,
+				` :60\:22\:32\:1D\:24\:E3:Chupacabra:153:540 Mbit/s:92:WPA2`,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, ParseCliOutput(tt.output), "ParseCliOutput(%v)", tt.output)
 		})
 	}
 }

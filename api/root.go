@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/danesparza/iot-wifi-setup/internal/network"
 	"github.com/danesparza/iot-wifi-setup/version"
 	"net/http"
 	"time"
@@ -11,6 +12,7 @@ import (
 // Service encapsulates API service operations
 type Service struct {
 	StartTime time.Time
+	NM        network.NetworkManagerService
 }
 
 // SystemResponse is a response for a system request

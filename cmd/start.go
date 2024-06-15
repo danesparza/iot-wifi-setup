@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/danesparza/iot-wifi-setup/api"
 	_ "github.com/danesparza/iot-wifi-setup/docs" // swagger docs location
+	"github.com/danesparza/iot-wifi-setup/internal/network"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -43,6 +44,7 @@ func start(cmd *cobra.Command, args []string) {
 	//	Create an api service object
 	apiService := api.Service{
 		StartTime: time.Now(),
+		NM:        network.NewNetworkManagerService(),
 	}
 
 	//	Trap program exit appropriately
