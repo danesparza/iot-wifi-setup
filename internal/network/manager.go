@@ -12,12 +12,23 @@ import (
 )
 
 type NetworkManagerService interface {
+	ActiveConnections(ctx context.Context) ([]model.Connection, error)
 	StartAPMode(ctx context.Context, SSIDBaseName, passphrase string, passwordless bool) error
 	ListAccessPoints(ctx context.Context) ([]model.AccessPoint, error)
 	UpdateLocalWifiSettings(ctx context.Context, SSID, passphrase string) error
 }
 
 type networkManagerService struct{}
+
+// ActiveConnections shows active network connections.  If there are
+// no wifi connections, AP mode should be started
+func (n networkManagerService) ActiveConnections(ctx context.Context) ([]model.Connection, error) {
+	//	sudo nmcli con show --active
+	//	Should probably also include information about general status:
+	// 	sudo nmcli --terse --fields state,connectivity,wifi general status
+	//TODO implement me
+	panic("implement me")
+}
 
 // UpdateLocalWifiSettings updates the local device's network connection settings so
 // the device can connect to the specified SSID with the given passphrase
