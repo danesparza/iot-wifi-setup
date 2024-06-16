@@ -14,9 +14,25 @@ import (
 // https://www.networkmanager.dev/docs/api/latest/nmcli-examples.html
 type NetworkManagerService interface {
 	ListAccessPoints(ctx context.Context) ([]model.AccessPoint, error)
+	StartAPMode(ctx context.Context, SSIDBaseName, passphrase string, passwordless bool) error
 }
 
 type networkManagerService struct{}
+
+func (n networkManagerService) StartAPMode(ctx context.Context, SSIDBaseName, passphrase string, passwordless bool) error {
+	//	With a password it's simpler:
+	// 	sudo nmcli dev wifi hotspot ifname wlan0 ssid test password "test1234"
+
+	//	Passwordless is apparently possible and takes a few more commands:
+	//	sudo nmcli connection add type wifi ifname $WIFI_INTERFACE con-name $AP autoconnect yes ssid $AP
+	//	sudo nmcli connection modify $AP 802-11-wireless.mode ap 802-11-wireless.band bg ipv4.method shared
+	//	sudo nmcli connection modify $AP wifi-sec.key-mgmt none
+	//	sudo nmcli connection up $AP
+	//	sudo nmcli connection modify $AP connection.autoconnect yes
+
+	//TODO implement me
+	panic("implement me")
+}
 
 // ListAccessPoints lists the nearby access points
 func (n networkManagerService) ListAccessPoints(ctx context.Context) ([]model.AccessPoint, error) {
