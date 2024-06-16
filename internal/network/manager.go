@@ -11,14 +11,32 @@ import (
 	"strings"
 )
 
-// https://www.networkmanager.dev/docs/api/latest/nmcli-examples.html
 type NetworkManagerService interface {
-	ListAccessPoints(ctx context.Context) ([]model.AccessPoint, error)
 	StartAPMode(ctx context.Context, SSIDBaseName, passphrase string, passwordless bool) error
+	ListAccessPoints(ctx context.Context) ([]model.AccessPoint, error)
+	UpdateLocalWifiSettings(ctx context.Context, SSID, passphrase string) error
 }
 
 type networkManagerService struct{}
 
+// UpdateLocalWifiSettings updates the local device's network connection settings so
+// the device can connect to the specified SSID with the given passphrase
+func (n networkManagerService) UpdateLocalWifiSettings(ctx context.Context, SSID, passphrase string) error {
+	//	(optional) disconnect from previous wifi network if currently connected
+	//	sudo nmcli con down <AP name>
+
+	//	Connect to the new AP
+	//	nmcli device wifi connect <AP name> password <password>
+
+	//	This will automatically create a file in /etc/NetworkManager/system-connections/
+	//	with the AP name, which will contain the configuration.
+
+	//TODO implement me
+	panic("implement me")
+}
+
+// StartAPMode starts the device in AP mode so other nearby devices can discover it.  The access point that
+// is created uses the SSIDBaseName as the first part of the access point name.
 func (n networkManagerService) StartAPMode(ctx context.Context, SSIDBaseName, passphrase string, passwordless bool) error {
 	//	With a password it's simpler:
 	// 	sudo nmcli dev wifi hotspot ifname wlan0 ssid test password "test1234"
