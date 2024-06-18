@@ -20,9 +20,8 @@ type NetworkManagerService interface {
 
 type networkManagerService struct{}
 
-// ActiveConnections shows active network connections.  If there are
-// no wifi connections, AP mode should be started
-func (n networkManagerService) ActiveConnections(ctx context.Context) (model.NetworkStatus, error) {
+// NetworkStatus shows network status and lists active network connections (if any)
+func (n networkManagerService) NetworkStatus(ctx context.Context) (model.NetworkStatus, error) {
 	//	sudo nmcli con show --active
 	//	Should probably also include information about general status:
 	// 	sudo nmcli --terse --fields state,connectivity,wifi general status
