@@ -22,9 +22,18 @@ type networkManagerService struct{}
 
 // NetworkStatus shows network status and lists active network connections (if any)
 func (n networkManagerService) NetworkStatus(ctx context.Context) (model.NetworkStatus, error) {
-	//	sudo nmcli con show --active
-	//	Should probably also include information about general status:
+	//	sudo nmcli --terse --fields name,uuid,type,device con show --active
+	//	This shows (and the loopback interface is there even when no others are configured)
+	//  danup:d3370d70-408e-4b75-ae40-eda12208222a:802-11-wireless:wlan0
+	//	lo:8b495afc-6b59-41ed-bd83-be939f15f0be:loopback:lo
+
+	//	Information about general status:
 	// 	sudo nmcli --terse --fields state,connectivity,wifi general status
+	//	When no network ocnnected but wifi enabled this returns:
+	//	disconnected:none:enabled
+	//	When network connected (and can get to the internet)
+	//	connected:full:enabled
+
 	//TODO implement me
 	panic("implement me")
 }
