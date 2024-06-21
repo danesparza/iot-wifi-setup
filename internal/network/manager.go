@@ -40,8 +40,8 @@ func (n networkManagerService) NetworkStatus(ctx context.Context) (model.Network
 	//	Parse each line of the output
 	outputLines := ParseCliOutput(stdout.String())
 
-	//	We should have exactly one line
-	if len(outputLines) == 1 {
+	//	We should have at least one line
+	if len(outputLines) >= 1 {
 		if len(strings.TrimSpace(outputLines[0])) > 0 {
 			retval = convert.ConvertFieldsToNetworkStatus(ParseCliOutputLine(outputLines[0]))
 		}
