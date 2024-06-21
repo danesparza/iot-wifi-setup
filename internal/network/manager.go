@@ -22,10 +22,32 @@ type networkManagerService struct{}
 
 // NetworkStatus shows network status and lists active network connections (if any)
 func (n networkManagerService) NetworkStatus(ctx context.Context) (model.NetworkStatus, error) {
-	//	sudo nmcli --terse --fields name,uuid,type,device con show --active
-	//	This shows (and the loopback interface is there even when no others are configured)
-	//  danup:d3370d70-408e-4b75-ae40-eda12208222a:802-11-wireless:wlan0
-	//	lo:8b495afc-6b59-41ed-bd83-be939f15f0be:loopback:lo
+	retval := model.NetworkStatus{
+		ActiveConnections: make([]model.Connection, 0),
+	}
+
+	//	Get general status 🫡
+	var stdout, stderr bytes.Buffer
+	cmdStatus := exec.CommandContext(ctx, "nmcli", "--terse", "--fields", "state,connectivity,wifi", "general", "status")
+	cmdStatus.Stdout = &stdout
+	cmdStatus.Stderr = &stderr
+	err := cmdStatus.Run()
+	if err != nil {
+		log.Err(err).Msg("General status failed")
+		return retval, fmt.Errorf("problem getting general status: %w", err)
+	}
+
+	//	Parse each line of the output
+	outputLines := ParseCliOutput(stdout.String())
+
+	//	We should have exactly one line
+	if len(outputLines) == 1 {
+		if len(strings.TrimSpace(outputLines[0])) > 0 {
+			retval = convert.ConvertFieldsToNetworkStatus(ParseCliOutputLine(outputLines[0]))
+		}
+	} else {
+		log.Error().Strs("output", outputLines).Msg("Unexpected output while getting general status")
+	}
 
 	//	Information about general status:
 	// 	sudo nmcli --terse --fields state,connectivity,wifi general status
@@ -34,8 +56,36 @@ func (n networkManagerService) NetworkStatus(ctx context.Context) (model.Network
 	//	When network connected (and can get to the internet)
 	//	connected:full:enabled
 
-	//TODO implement me
-	panic("implement me")
+	//	Collect information about active connections
+	var constdout, constderr bytes.Buffer
+	cmdList := exec.CommandContext(ctx, "nmcli", "--terse", "--fields", "name,uuid,type,device", "con", "show", "--active")
+	cmdList.Stdout = &constdout
+	cmdList.Stderr = &constderr
+	err = cmdList.Run()
+	if err != nil {
+		log.Err(err).Msg("Active connections list failed")
+		return retval, fmt.Errorf("problem listing active connections: %w", err)
+	}
+
+	//	Parse each line of the output
+	outputLines = ParseCliOutput(constdout.String())
+	for _, line := range outputLines {
+		if len(strings.TrimSpace(line)) > 0 {
+			connection := convert.ConvertFieldsToActiveConnections(ParseCliOutputLine(line))
+
+			//	Add the connection to the list if the UUID isn't blank
+			if strings.TrimSpace(connection.UUID) != "" {
+				retval.ActiveConnections = append(retval.ActiveConnections, connection)
+			}
+		}
+	}
+
+	//	sudo nmcli --terse --fields name,uuid,type,device con show --active
+	//	This shows (and the loopback interface is there even when no others are configured)
+	//  danup:d3370d70-408e-4b75-ae40-eda12208222a:802-11-wireless:wlan0
+	//	lo:8b495afc-6b59-41ed-bd83-be939f15f0be:loopback:lo
+
+	return retval, nil
 }
 
 // UpdateLocalWifiSettings updates the local device's network connection settings so

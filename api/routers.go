@@ -31,6 +31,11 @@ func NewRouter(apiService Service) http.Handler {
 	}))
 
 	r.Route("/v1", func(r chi.Router) {
+		//	Network status
+		r.Route("/status", func(r chi.Router) {
+			r.Get("/", apiService.ListAccessPoints) // Get network status
+		})
+
 		//	Wifi APs
 		r.Route("/aps", func(r chi.Router) {
 			r.Get("/", apiService.ListAccessPoints) // Get all nearby access points
