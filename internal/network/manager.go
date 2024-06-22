@@ -122,6 +122,12 @@ func (n networkManagerService) StartAPMode(ctx context.Context, ssid, passphrase
 			return fmt.Errorf("problem starting open AP - setting key management: %w", err)
 		}
 
+		//	sudo nmcli device disconnect wlan0
+		if err := exec.CommandContext(ctx, "nmcli", "device", "disconnect", "wlan0").Run(); err != nil {
+			log.Err(err).Str("type", "open").Msg("problem dropping existing connections")
+			return fmt.Errorf("problem starting open AP - dropping existing connections: %w", err)
+		}
+
 		//	sudo nmcli connection up $AP
 		if err := exec.CommandContext(ctx, "nmcli", "connection", "up", ssid).Run(); err != nil {
 			log.Err(err).Str("type", "open").Msg("problem setting connection up")
