@@ -13,7 +13,7 @@ import (
 
 type NetworkManagerService interface {
 	NetworkStatus(ctx context.Context) (model.NetworkStatus, error)
-	StartAPMode(ctx context.Context, SSIDBaseName, passphrase string, passwordless bool) error
+	StartAPMode(ctx context.Context, SSIDBaseName, passphrase string) error
 	StopAPMode(ctx context.Context, SSID string) error
 	ListAccessPoints(ctx context.Context) ([]model.AccessPoint, error)
 	UpdateLocalWifiSettings(ctx context.Context, SSID, passphrase string) error
@@ -100,20 +100,50 @@ func (n networkManagerService) UpdateLocalWifiSettings(ctx context.Context, SSID
 }
 
 // StartAPMode starts the device in AP mode so other nearby devices can discover it.  The access point that
-// is created uses the SSIDBaseName as the first part of the access point name.
-func (n networkManagerService) StartAPMode(ctx context.Context, SSIDBaseName, passphrase string, passwordless bool) error {
-	//	With a password it's simpler:
-	// 	sudo nmcli dev wifi hotspot ifname wlan0 ssid test password "test1234"
+// is created uses the ssid as the access point name.  If the passphrase is blank, an open AP is created
+func (n networkManagerService) StartAPMode(ctx context.Context, ssid, passphrase string) error {
+	if strings.TrimSpace(passphrase) == "" {
+		//	Start an AP without a password:
+		//	sudo nmcli connection add type wifi ifname $WIFI_INTERFACE con-name $AP autoconnect yes ssid $AP
+		if err := exec.CommandContext(ctx, "nmcli", "connection", "add", "type", "wifi", "ifname", "wlan0", "con-name", ssid, "autoconnect", "yes", "ssid", ssid).Run(); err != nil {
+			log.Err(err).Str("type", "open").Msg("problem adding interface")
+			return fmt.Errorf("problem starting open AP - adding interface: %w", err)
+		}
 
-	//	Passwordless is apparently possible and takes a few more commands:
-	//	sudo nmcli connection add type wifi ifname $WIFI_INTERFACE con-name $AP autoconnect yes ssid $AP
-	//	sudo nmcli connection modify $AP 802-11-wireless.mode ap 802-11-wireless.band bg ipv4.method shared
-	//	sudo nmcli connection modify $AP wifi-sec.key-mgmt none
-	//	sudo nmcli connection up $AP
-	//	sudo nmcli connection modify $AP connection.autoconnect yes
+		//	sudo nmcli connection modify $AP 802-11-wireless.mode ap 802-11-wireless.band bg ipv4.method shared
+		if err := exec.CommandContext(ctx, "nmcli", "connection", "modify", ssid, "802-11-wireless.mode", "ap", "802-11-wireless.band", "bg", "ipv4.method", "shared").Run(); err != nil {
+			log.Err(err).Str("type", "open").Msg("problem setting mode")
+			return fmt.Errorf("problem starting open AP - setting mode: %w", err)
+		}
 
-	//TODO implement me
-	panic("implement me")
+		//	sudo nmcli connection modify $AP wifi-sec.key-mgmt none
+		if err := exec.CommandContext(ctx, "nmcli", "connection", "modify", ssid, "wifi-sec.key-mgmt", "none").Run(); err != nil {
+			log.Err(err).Str("type", "open").Msg("problem setting key management")
+			return fmt.Errorf("problem starting open AP - setting key management: %w", err)
+		}
+
+		//	sudo nmcli connection up $AP
+		if err := exec.CommandContext(ctx, "nmcli", "connection", "up", ssid).Run(); err != nil {
+			log.Err(err).Str("type", "open").Msg("problem setting connection up")
+			return fmt.Errorf("problem starting open AP - setting connection up: %w", err)
+		}
+
+		//	sudo nmcli connection modify $AP connection.autoconnect yes
+		if err := exec.CommandContext(ctx, "nmcli", "connection", "modify", ssid, "connection.autoconnect", "yes").Run(); err != nil {
+			log.Err(err).Str("type", "open").Msg("problem setting autoconnect yes")
+			return fmt.Errorf("problem starting open AP - setting autoconnect yes: %w", err)
+		}
+	} else {
+		//	Start an AP with a password:
+		// 	sudo nmcli dev wifi hotspot ifname wlan0 ssid test password "test1234"
+		err := exec.CommandContext(ctx, "nmcli", "dev", "wifi", "hotspot", "ifname", "wlan0", "ssid", ssid, "password", passphrase).Run()
+		if err != nil {
+			log.Err(err).Str("type", "secure").Msg("Problem starting AP mode")
+			return fmt.Errorf("problem starting AP mode with password: %w", err)
+		}
+	}
+
+	return nil
 }
 
 // StopAPMode stops AP mode (running as the given SSID)

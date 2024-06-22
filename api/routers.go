@@ -39,6 +39,7 @@ func NewRouter(apiService Service) http.Handler {
 		//	Wifi APs
 		r.Route("/aps", func(r chi.Router) {
 			r.Get("/", apiService.ListAccessPoints) // Get all nearby access points
+			r.Put("/", apiService.StartAPMode)      // Turn on AP mode
 		})
 	})
 

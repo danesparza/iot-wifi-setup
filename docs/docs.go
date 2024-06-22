@@ -46,6 +46,44 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "put": {
+                "description": "Start Access Point mode",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "network"
+                ],
+                "summary": "Start Access Point mode",
+                "parameters": [
+                    {
+                        "description": "The SSID (required) and passphrase (optional) to use with the AP",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.APModeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SystemResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
             }
         },
         "/status": {
@@ -92,6 +130,17 @@ const docTemplate = `{
             "properties": {
                 "data": {},
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.APModeRequest": {
+            "type": "object",
+            "properties": {
+                "passphrase": {
+                    "type": "string"
+                },
+                "ssid": {
                     "type": "string"
                 }
             }

@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/danesparza/iot-wifi-setup/internal/network/model"
 	"net/http"
 )
 
@@ -58,6 +59,47 @@ func (service Service) ListAccessPoints(rw http.ResponseWriter, req *http.Reques
 	response := SystemResponse{
 		Message: "Nearby wifi access points",
 		Data:    aps,
+	}
+
+	//	Serialize to JSON & return the response:
+	rw.WriteHeader(http.StatusOK)
+	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(rw).Encode(response)
+}
+
+// StartAPMode godoc
+// @Summary Start Access Point mode
+// @Description Start Access Point mode
+// @Tags network
+// @Accept  json
+// @Produce  json
+// @Param request body model.APModeRequest true "The SSID (required) and passphrase (optional) to use with the AP"
+// @Success 200 {object} api.SystemResponse
+// @Failure 500 {object} api.ErrorResponse
+// @Router /aps [put]
+func (service Service) StartAPMode(rw http.ResponseWriter, req *http.Request) {
+
+	//	Parse the body to get the request info
+	request := model.APModeRequest{}
+	err := json.NewDecoder(req.Body).Decode(&request)
+	if err != nil {
+		err = fmt.Errorf("problem decoding start AP mode request: %w", err)
+		sendErrorResponse(rw, err, http.StatusBadRequest)
+		return
+	}
+
+	//	Call the network manager to list the APs
+	err = service.NM.StartAPMode(req.Context(), request.SSID, request.Passphrase)
+	if err != nil {
+		err = fmt.Errorf("error starting ap mode: %w", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
+
+	//	Show wifi access points
+	response := SystemResponse{
+		Message: "AP mode started",
+		Data:    request,
 	}
 
 	//	Serialize to JSON & return the response:

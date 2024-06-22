@@ -9,3 +9,8 @@ type AccessPoint struct {
 	Signal   int
 	Security string
 }
+
+type APModeRequest struct {
+	SSID       string `json:"ssid"`
+	Passphrase string `json:"passphrase"`
+}

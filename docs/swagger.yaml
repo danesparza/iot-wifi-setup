@@ -11,6 +11,13 @@ definitions:
       message:
         type: string
     type: object
+  model.APModeRequest:
+    properties:
+      passphrase:
+        type: string
+      ssid:
+        type: string
+    type: object
 info:
   contact: {}
   description: iot-wifi-setup helps get connected to local wifi network then hand-off
@@ -38,6 +45,32 @@ paths:
           schema:
             $ref: '#/definitions/api.ErrorResponse'
       summary: List all nearby wifi access points
+      tags:
+      - network
+    put:
+      consumes:
+      - application/json
+      description: Start Access Point mode
+      parameters:
+      - description: The SSID (required) and passphrase (optional) to use with the
+          AP
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.APModeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Start Access Point mode
       tags:
       - network
   /status:
