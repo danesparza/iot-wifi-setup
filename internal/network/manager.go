@@ -14,6 +14,7 @@ import (
 type NetworkManagerService interface {
 	NetworkStatus(ctx context.Context) (model.NetworkStatus, error)
 	StartAPMode(ctx context.Context, SSIDBaseName, passphrase string, passwordless bool) error
+	StopAPMode(ctx context.Context, SSID string) error
 	ListAccessPoints(ctx context.Context) ([]model.AccessPoint, error)
 	UpdateLocalWifiSettings(ctx context.Context, SSID, passphrase string) error
 }
@@ -111,6 +112,12 @@ func (n networkManagerService) StartAPMode(ctx context.Context, SSIDBaseName, pa
 	//	sudo nmcli connection up $AP
 	//	sudo nmcli connection modify $AP connection.autoconnect yes
 
+	//TODO implement me
+	panic("implement me")
+}
+
+// StopAPMode stops AP mode (running as the given SSID)
+func (n networkManagerService) StopAPMode(ctx context.Context, SSID string) error {
 	//TODO implement me
 	panic("implement me")
 }
