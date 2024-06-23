@@ -104,40 +104,16 @@ func (n networkManagerService) UpdateLocalWifiSettings(ctx context.Context, SSID
 func (n networkManagerService) StartAPMode(ctx context.Context, ssid, passphrase string) error {
 	if strings.TrimSpace(passphrase) == "" {
 		//	Start an AP without a password:
-		//	sudo nmcli connection add type wifi ifname $WIFI_INTERFACE con-name $AP autoconnect yes ssid $AP
-		if err := exec.CommandContext(ctx, "nmcli", "connection", "add", "type", "wifi", "ifname", "wlan0", "con-name", ssid, "autoconnect", "yes", "ssid", ssid).Run(); err != nil {
-			log.Err(err).Str("type", "open").Msg("problem adding interface")
-			return fmt.Errorf("problem starting open AP - adding interface: %w", err)
+		//	sudo nmcli connection add type wifi con-name open-hotspot autoconnect no wifi.mode ap wifi.ssid "SuperOpenPidy" ipv4.method shared ipv6.method shared
+		if err := exec.CommandContext(ctx, "nmcli", "connection", "add", "type", "wifi", "con-name", ssid, "autoconnect", "no", "wifi.mode", "ap", "wifi.ssid", ssid, "ipv4.method", "shared", "ipv6.method", "shared").Run(); err != nil {
+			log.Err(err).Str("type", "open").Msg("problem adding connection")
+			return fmt.Errorf("problem starting open AP - adding connection: %w", err)
 		}
 
-		//	sudo nmcli connection modify $AP 802-11-wireless.mode ap 802-11-wireless.band bg ipv4.method shared
-		if err := exec.CommandContext(ctx, "nmcli", "connection", "modify", ssid, "802-11-wireless.mode", "ap", "802-11-wireless.band", "bg", "ipv4.method", "shared").Run(); err != nil {
-			log.Err(err).Str("type", "open").Msg("problem setting mode")
-			return fmt.Errorf("problem starting open AP - setting mode: %w", err)
-		}
-
-		//	sudo nmcli connection modify $AP wifi-sec.key-mgmt none
-		if err := exec.CommandContext(ctx, "nmcli", "connection", "modify", ssid, "wifi-sec.key-mgmt", "none").Run(); err != nil {
-			log.Err(err).Str("type", "open").Msg("problem setting key management")
-			return fmt.Errorf("problem starting open AP - setting key management: %w", err)
-		}
-
-		//	sudo nmcli device disconnect wlan0
-		if err := exec.CommandContext(ctx, "nmcli", "device", "disconnect", "wlan0").Run(); err != nil {
-			log.Err(err).Str("type", "open").Msg("problem dropping existing connections")
-			return fmt.Errorf("problem starting open AP - dropping existing connections: %w", err)
-		}
-
-		//	sudo nmcli connection up $AP
+		//	sudo nmcli connection up open-hotspot
 		if err := exec.CommandContext(ctx, "nmcli", "connection", "up", ssid).Run(); err != nil {
 			log.Err(err).Str("type", "open").Msg("problem setting connection up")
 			return fmt.Errorf("problem starting open AP - setting connection up: %w", err)
-		}
-
-		//	sudo nmcli connection modify $AP connection.autoconnect yes
-		if err := exec.CommandContext(ctx, "nmcli", "connection", "modify", ssid, "connection.autoconnect", "yes").Run(); err != nil {
-			log.Err(err).Str("type", "open").Msg("problem setting autoconnect yes")
-			return fmt.Errorf("problem starting open AP - setting autoconnect yes: %w", err)
 		}
 	} else {
 		//	Start an AP with a password:
