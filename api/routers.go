@@ -41,10 +41,15 @@ func NewRouter(apiService Service) http.Handler {
 			r.Get("/", apiService.ListAccessPoints) // Get all nearby access points
 			r.Put("/", apiService.StartAPMode)      // Turn on AP mode
 		})
+
+		//	Client network
+		r.Route("/network", func(r chi.Router) {
+			r.Put("/", apiService.SetClientWifi) // Set client network information
+		})
 	})
 
-	r.Route("/", func(r chi.Router) {
-		r.Get("/uitest", ShowUI)
+	r.Route("/ui", func(r chi.Router) {
+		r.Get("/", ShowUI)
 	})
 
 	//	SWAGGER

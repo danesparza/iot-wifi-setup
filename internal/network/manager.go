@@ -16,7 +16,7 @@ type NetworkManagerService interface {
 	StartAPMode(ctx context.Context, SSIDBaseName, passphrase string) error
 	StopAPMode(ctx context.Context, SSID string) error
 	ListAccessPoints(ctx context.Context) ([]model.AccessPoint, error)
-	UpdateLocalWifiSettings(ctx context.Context, SSID, passphrase string) error
+	SetClientWifiConnection(ctx context.Context, SSID, passphrase string) error
 }
 
 type networkManagerService struct {
@@ -83,20 +83,31 @@ func (n networkManagerService) NetworkStatus(ctx context.Context) (model.Network
 	return retval, nil
 }
 
-// UpdateLocalWifiSettings updates the local device's network connection settings so
+// SetClientWifiConnection updates the local device's network connection settings so
 // the device can connect to the specified SSID with the given passphrase
-func (n networkManagerService) UpdateLocalWifiSettings(ctx context.Context, SSID, passphrase string) error {
+func (n networkManagerService) SetClientWifiConnection(ctx context.Context, SSID, passphrase string) error {
 	//	(optional) disconnect from previous wifi network if currently connected
 	//	sudo nmcli con down <AP name>
 
-	//	Connect to the new AP
-	//	nmcli device wifi connect <AP name> password <password>
+	//	Add a connection to the AP.  This should be set to autoconnect by default
+	//	sudo nmcli dev wifi connect "MyNetwork" password "MyPassword123"
+	err := exec.CommandContext(ctx, "nmcli", "dev", "wifi", "connect", SSID, "password", passphrase).Run()
+	if err != nil {
+		log.Err(err).Msg("Problem connecting to wifi")
+		return fmt.Errorf("problem connecting to wifi: %w", err)
+	}
 
 	//	This will automatically create a file in /etc/NetworkManager/system-connections/
 	//	with the AP name, which will contain the configuration.
 
-	//TODO implement me
-	panic("implement me")
+	//	Reboot
+	err = exec.CommandContext(ctx, "reboot").Run()
+	if err != nil {
+		log.Err(err).Msg("Problem rebooting after setting client wifi connection")
+		return fmt.Errorf("problem rebooting after setting client wifi connection: %w", err)
+	}
+
+	return nil
 }
 
 // StartAPMode starts the device in AP mode so other nearby devices can discover it.  The access point that

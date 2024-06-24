@@ -73,6 +73,33 @@ paths:
       summary: Start Access Point mode
       tags:
       - network
+  /network:
+    put:
+      consumes:
+      - application/json
+      description: Sets the client wifi network connection
+      parameters:
+      - description: The SSID (required) and passphrase (optional) to use with the
+          AP
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.APModeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Sets the client wifi network connection
+      tags:
+      - network
   /status:
     get:
       consumes:

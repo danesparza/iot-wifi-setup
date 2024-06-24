@@ -88,7 +88,7 @@ func (service Service) StartAPMode(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	//	Call the network manager to list the APs
+	//	Call the network manager
 	err = service.NM.StartAPMode(req.Context(), request.SSID, request.Passphrase)
 	if err != nil {
 		err = fmt.Errorf("error starting ap mode: %w", err)
@@ -99,6 +99,47 @@ func (service Service) StartAPMode(rw http.ResponseWriter, req *http.Request) {
 	//	Show wifi access points
 	response := SystemResponse{
 		Message: "AP mode started",
+		Data:    request,
+	}
+
+	//	Serialize to JSON & return the response:
+	rw.WriteHeader(http.StatusOK)
+	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	json.NewEncoder(rw).Encode(response)
+}
+
+// SetClientWifi godoc
+// @Summary Sets the client wifi network connection
+// @Description Sets the client wifi network connection
+// @Tags network
+// @Accept  json
+// @Produce  json
+// @Param request body model.APModeRequest true "The SSID (required) and passphrase (optional) to use with the AP"
+// @Success 200 {object} api.SystemResponse
+// @Failure 500 {object} api.ErrorResponse
+// @Router /network [put]
+func (service Service) SetClientWifi(rw http.ResponseWriter, req *http.Request) {
+
+	//	Parse the body to get the request info
+	request := model.APModeRequest{}
+	err := json.NewDecoder(req.Body).Decode(&request)
+	if err != nil {
+		err = fmt.Errorf("problem decoding set client wifi request: %w", err)
+		sendErrorResponse(rw, err, http.StatusBadRequest)
+		return
+	}
+
+	//	Call the network manager
+	err = service.NM.SetClientWifiConnection(req.Context(), request.SSID, request.Passphrase)
+	if err != nil {
+		err = fmt.Errorf("error starting ap mode: %w", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
+
+	//	Show wifi access points
+	response := SystemResponse{
+		Message: "Client wifi connection set.  Rebooting",
 		Data:    request,
 	}
 
