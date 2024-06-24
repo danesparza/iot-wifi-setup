@@ -61,7 +61,7 @@ const docTemplate = `{
                 "summary": "Start Access Point mode",
                 "parameters": [
                     {
-                        "description": "The SSID (required) and passphrase (optional) to use with the AP",
+                        "description": "The required SSID and optional passphrase to use with the AP",
                         "name": "request",
                         "in": "body",
                         "required": true,

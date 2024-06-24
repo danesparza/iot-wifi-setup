@@ -73,7 +73,7 @@ func (service Service) ListAccessPoints(rw http.ResponseWriter, req *http.Reques
 // @Tags network
 // @Accept  json
 // @Produce  json
-// @Param request body model.APModeRequest true "The SSID (required) and passphrase (optional) to use with the AP"
+// @Param request body model.APModeRequest true "The required SSID and optional passphrase to use with the AP"
 // @Success 200 {object} api.SystemResponse
 // @Failure 500 {object} api.ErrorResponse
 // @Router /aps [put]

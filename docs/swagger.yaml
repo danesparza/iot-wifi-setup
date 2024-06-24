@@ -52,8 +52,7 @@ paths:
       - application/json
       description: Start Access Point mode
       parameters:
-      - description: The SSID (required) and passphrase (optional) to use with the
-          AP
+      - description: The required SSID and optional passphrase to use with the AP
         in: body
         name: request
         required: true
