@@ -47,6 +47,7 @@ paths:
       summary: List all nearby wifi access points
       tags:
       - network
+  /configure/apmode:
     put:
       consumes:
       - application/json
@@ -72,7 +73,7 @@ paths:
       summary: Start Access Point mode
       tags:
       - network
-  /network:
+  /configure/client:
     put:
       consumes:
       - application/json

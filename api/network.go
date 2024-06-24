@@ -76,7 +76,7 @@ func (service Service) ListAccessPoints(rw http.ResponseWriter, req *http.Reques
 // @Param request body model.APModeRequest true "The required SSID and optional passphrase to use with the AP"
 // @Success 200 {object} api.SystemResponse
 // @Failure 500 {object} api.ErrorResponse
-// @Router /aps [put]
+// @Router /configure/apmode [put]
 func (service Service) StartAPMode(rw http.ResponseWriter, req *http.Request) {
 
 	//	Parse the body to get the request info
@@ -117,7 +117,7 @@ func (service Service) StartAPMode(rw http.ResponseWriter, req *http.Request) {
 // @Param request body model.APModeRequest true "The SSID (required) and passphrase (optional) to use with the AP"
 // @Success 200 {object} api.SystemResponse
 // @Failure 500 {object} api.ErrorResponse
-// @Router /network [put]
+// @Router /configure/client [put]
 func (service Service) SetClientWifi(rw http.ResponseWriter, req *http.Request) {
 
 	//	Parse the body to get the request info

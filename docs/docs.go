@@ -46,7 +46,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/configure/apmode": {
             "put": {
                 "description": "Start Access Point mode",
                 "consumes": [
@@ -86,7 +88,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/network": {
+        "/configure/client": {
             "put": {
                 "description": "Sets the client wifi network connection",
                 "consumes": [

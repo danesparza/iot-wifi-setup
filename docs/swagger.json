@@ -39,7 +39,9 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/configure/apmode": {
             "put": {
                 "description": "Start Access Point mode",
                 "consumes": [
@@ -79,7 +81,7 @@
                 }
             }
         },
-        "/network": {
+        "/configure/client": {
             "put": {
                 "description": "Sets the client wifi network connection",
                 "consumes": [
