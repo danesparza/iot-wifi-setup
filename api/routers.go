@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/danesparza/iot-wifi-setup/ui"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -47,12 +48,11 @@ func NewRouter(apiService Service) http.Handler {
 		})
 	})
 
-	r.Route("/ui", func(r chi.Router) {
-		r.Get("/", ShowUI)
-	})
-
 	//	SWAGGER
 	r.Mount("/swagger", httpSwagger.WrapHandler)
+
+	//	Route for embedded UI
+	r.Handle("/*", http.FileServer(http.FS(ui.EmbeddedFS)))
 
 	return r
 }
