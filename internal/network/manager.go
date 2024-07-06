@@ -185,6 +185,6 @@ func (n networkManagerService) ListAccessPoints(ctx context.Context) ([]model.Ac
 
 // NewNetworkManagerService creates a new network manager service
 func NewNetworkManagerService() NetworkManagerService {
-	svc := networkManagerService{}
+	svc := &networkManagerService{}
 	return svc
 }

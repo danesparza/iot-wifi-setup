@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/danesparza/iot-wifi-setup/api"
 	_ "github.com/danesparza/iot-wifi-setup/docs" // swagger docs location
+	"github.com/danesparza/iot-wifi-setup/internal/monitor"
 	"github.com/danesparza/iot-wifi-setup/internal/network"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -41,17 +42,26 @@ func start(cmd *cobra.Command, args []string) {
 		log.Debug().Msg("No config file found")
 	}
 
-	//	Create an api service object
-	apiService := api.Service{
-		StartTime: time.Now(),
-		NM:        network.NewNetworkManagerService(),
-	}
-
 	//	Trap program exit appropriately
 	ctx, cancel := context.WithCancel(context.Background())
 	sigs := make(chan os.Signal, 2)
 	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
 	go handleSignals(ctx, sigs, cancel)
+
+	//	Create the network manager service
+	nmsvc := network.NewNetworkManagerService()
+
+	//	Create an api service object
+	apiService := api.Service{
+		StartTime: time.Now(),
+		NM:        nmsvc,
+	}
+
+	//	Create a network monitor service object and start the service
+	nmMonitorService := monitor.Service{
+		NM: nmsvc,
+	}
+	go nmMonitorService.NetworkStatus(ctx)
 
 	//	Set up the API routes
 	r := api.NewRouter(apiService)
