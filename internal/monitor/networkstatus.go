@@ -13,7 +13,7 @@ type Service struct {
 	NM network.NetworkManagerService
 }
 
-func (service Service) NetworkStatus(ctx context.Context) {
+func (service Service) NetworkStatus(ctx context.Context, apmodeSSIDbase, apmodePassword string) {
 	frequencystring, freqset := os.LookupEnv("NETWORK_MONITOR_FREQ")
 	if freqset != true {
 		frequencystring = "30s"
@@ -34,6 +34,21 @@ func (service Service) NetworkStatus(ctx context.Context) {
 		case <-time.After(frequency):
 			//	As we get a request on a channel ...
 			log.Debug().Msg("Checking network status")
+			netStatus, err := service.NM.NetworkStatus(ctx)
+			if err != nil {
+				log.Error().Err(err).Msg("NetworkStatus check failed")
+				continue
+			}
+			log.Debug().Str("connectivity", netStatus.Connectivity).Msg("NetworkStatus check done")
+
+			//	If connectivity isn't 'full' and we're not already in AP mode, we should go into Wifi AP mode
+			if netStatus.Connectivity != "full" && !service.NM.APModeIsOn() {
+				log.Debug().Str("connectivity", netStatus.Connectivity).Bool("apModeOn", service.NM.APModeIsOn()).Msg("Starting AP mode")
+				if err = service.NM.StartAPMode(ctx, apmodeSSIDbase, apmodePassword); err != nil {
+					log.Error().Err(err).Msg("NetworkStatus - problem starting AP mode")
+				}
+			}
+
 			//go CheckStatusAndHandleAPMode(ctx) // Launch the goroutine
 		case <-ctx.Done():
 			log.Info().Msg("NetworkStatus check stopping")

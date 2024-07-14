@@ -17,6 +17,7 @@ type NetworkManagerService interface {
 	StopAPMode(ctx context.Context, SSID string) error
 	ListAccessPoints(ctx context.Context) ([]model.AccessPoint, error)
 	SetClientWifiConnection(ctx context.Context, SSID, passphrase string) error
+	APModeIsOn() bool
 }
 
 type networkManagerService struct {
@@ -28,7 +29,7 @@ type networkManagerService struct {
 }
 
 // NetworkStatus shows network status and lists active network connections (if any)
-func (n networkManagerService) NetworkStatus(ctx context.Context) (model.NetworkStatus, error) {
+func (n *networkManagerService) NetworkStatus(ctx context.Context) (model.NetworkStatus, error) {
 	retval := model.NetworkStatus{
 		ActiveConnections: make([]model.Connection, 0),
 	}
@@ -85,7 +86,7 @@ func (n networkManagerService) NetworkStatus(ctx context.Context) (model.Network
 
 // SetClientWifiConnection updates the local device's network connection settings so
 // the device can connect to the specified SSID with the given passphrase
-func (n networkManagerService) SetClientWifiConnection(ctx context.Context, SSID, passphrase string) error {
+func (n *networkManagerService) SetClientWifiConnection(ctx context.Context, SSID, passphrase string) error {
 	//	(optional) disconnect from previous wifi network if currently connected
 	//	sudo nmcli con down <AP name>
 
@@ -100,6 +101,9 @@ func (n networkManagerService) SetClientWifiConnection(ctx context.Context, SSID
 	//	This will automatically create a file in /etc/NetworkManager/system-connections/
 	//	with the AP name, which will contain the configuration.
 
+	//	Make sure AP mode is off
+	n.apModeEnabled = false
+
 	//	Reboot
 	err = exec.CommandContext(ctx, "reboot").Run()
 	if err != nil {
@@ -112,7 +116,7 @@ func (n networkManagerService) SetClientWifiConnection(ctx context.Context, SSID
 
 // StartAPMode starts the device in AP mode so other nearby devices can discover it.  The access point that
 // is created uses the ssid as the access point name.  If the passphrase is blank, an open AP is created
-func (n networkManagerService) StartAPMode(ctx context.Context, ssid, passphrase string) error {
+func (n *networkManagerService) StartAPMode(ctx context.Context, ssid, passphrase string) error {
 	if strings.TrimSpace(passphrase) == "" {
 		//	Start an AP without a password:
 		//	sudo nmcli connection add type wifi con-name open-hotspot autoconnect no wifi.mode ap wifi.ssid "SuperOpenPidy" ipv4.method shared ipv6.method shared
@@ -136,17 +140,20 @@ func (n networkManagerService) StartAPMode(ctx context.Context, ssid, passphrase
 		}
 	}
 
+	//	Track that AP mode is on:
+	n.apModeEnabled = true
+
 	return nil
 }
 
 // StopAPMode stops AP mode (running as the given SSID)
-func (n networkManagerService) StopAPMode(ctx context.Context, SSID string) error {
+func (n *networkManagerService) StopAPMode(ctx context.Context, SSID string) error {
 	//TODO implement me
 	panic("implement me")
 }
 
 // ListAccessPoints lists the nearby access points
-func (n networkManagerService) ListAccessPoints(ctx context.Context) ([]model.AccessPoint, error) {
+func (n *networkManagerService) ListAccessPoints(ctx context.Context) ([]model.AccessPoint, error) {
 	retval := make([]model.AccessPoint, 0)
 
 	//	Create the command with context and request a wifi rescan
@@ -181,6 +188,10 @@ func (n networkManagerService) ListAccessPoints(ctx context.Context) ([]model.Ac
 	}
 
 	return retval, nil
+}
+
+func (n *networkManagerService) APModeIsOn() bool {
+	return n.apModeEnabled
 }
 
 // NewNetworkManagerService creates a new network manager service

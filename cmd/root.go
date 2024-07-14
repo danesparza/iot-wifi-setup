@@ -3,12 +3,9 @@ package cmd
 import (
 	"fmt"
 	"github.com/mitchellh/go-homedir"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
-	"path"
-	"path/filepath"
-
-	"github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -50,20 +47,18 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		viper.AddConfigPath(home)      // adding home directory as first search path
-		viper.AddConfigPath(".")       // also look in the working directory
-		viper.SetConfigName("fxaudio") // name the config file (without extension)
+		viper.AddConfigPath(home)           // adding home directory as first search path
+		viper.AddConfigPath(".")            // also look in the working directory
+		viper.SetConfigName("iotwifisetup") // name the config file (without extension)
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
 
 	//	Set our defaults
-	viper.SetDefault("datastore.system", filepath.Join(home, "fxaudio", "db", "fxaudio.db"))
-	viper.SetDefault("datastore.migrationsource", "./scripts/sqlite/migrations")
-	viper.SetDefault("upload.path", path.Join(home, "fxaudio", "uploads"))
-	viper.SetDefault("upload.bytelimit", 15*1024*1024) // 15MB
 	viper.SetDefault("server.port", 3070)
 	viper.SetDefault("server.allowed-origins", "*")
+	viper.SetDefault("apmode.ssidbase", "iot-wifi-setup")
+	viper.SetDefault("apmode.password", "") // Default to open AP mode
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {

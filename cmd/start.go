@@ -58,10 +58,12 @@ func start(cmd *cobra.Command, args []string) {
 	}
 
 	//	Create a network monitor service object and start the service
+	apmodeSSIDBase := viper.GetString("apmode.ssidbase")
+	apmodePassword := viper.GetString("apmode.password")
 	nmMonitorService := monitor.Service{
 		NM: nmsvc,
 	}
-	go nmMonitorService.NetworkStatus(ctx)
+	go nmMonitorService.NetworkStatus(ctx, apmodeSSIDBase, apmodePassword)
 
 	//	Set up the API routes
 	r := api.NewRouter(apiService)
