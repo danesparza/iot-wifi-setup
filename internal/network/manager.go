@@ -9,6 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 type NetworkManagerService interface {
@@ -18,6 +19,7 @@ type NetworkManagerService interface {
 	ListAccessPoints(ctx context.Context) ([]model.AccessPoint, error)
 	SetClientWifiConnection(ctx context.Context, SSID, passphrase string) error
 	APModeIsOn() bool
+	APModeStarted() time.Time
 }
 
 type networkManagerService struct {
@@ -26,6 +28,10 @@ type networkManagerService struct {
 
 	// apModeEnabled indicates whether AP mode is active or not
 	apModeEnabled bool
+
+	// apModeStartTime tracks when the AP mode starts.  We can compare that time with now and see if it
+	// exceeds our timeout -- and if it does exceed the timeout, then we can reboot
+	apModeStartTime time.Time
 }
 
 // NetworkStatus shows network status and lists active network connections (if any)
@@ -142,6 +148,7 @@ func (n *networkManagerService) StartAPMode(ctx context.Context, ssid, passphras
 
 	//	Track that AP mode is on:
 	n.apModeEnabled = true
+	n.apModeStartTime = time.Now()
 
 	return nil
 }
@@ -192,6 +199,10 @@ func (n *networkManagerService) ListAccessPoints(ctx context.Context) ([]model.A
 
 func (n *networkManagerService) APModeIsOn() bool {
 	return n.apModeEnabled
+}
+
+func (n *networkManagerService) APModeStarted() time.Time {
+	return n.apModeStartTime
 }
 
 // NewNetworkManagerService creates a new network manager service

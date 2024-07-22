@@ -4,7 +4,9 @@ import (
 	"context"
 	"github.com/danesparza/iot-wifi-setup/internal/network"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 	"os"
+	"os/exec"
 	"time"
 )
 
@@ -28,6 +30,13 @@ func (service Service) NetworkStatus(ctx context.Context, apmodeSSIDbase, apmode
 		frequency = 30 * time.Second
 	}
 
+	//	Parse the ap mode timeout string
+	apModeTimeout, err := time.ParseDuration(viper.GetString("apmode.timeout"))
+	if err != nil {
+		log.Warn().Str("apmode.timeout", viper.GetString("apmode.timeout")).Msg("Problem parsing apmode.timeout duration.  Using default of 10m.")
+		apModeTimeout = 10 * time.Minute
+	}
+
 	for {
 		select {
 		//	Execute it every so often
@@ -49,7 +58,18 @@ func (service Service) NetworkStatus(ctx context.Context, apmodeSSIDbase, apmode
 				}
 			}
 
-			//go CheckStatusAndHandleAPMode(ctx) // Launch the goroutine
+			//	If AP mode is on -- see if we have exceeded our AP mode timeout.
+			if service.NM.APModeIsOn() {
+				startTimePlusTimeout := service.NM.APModeStarted().Add(apModeTimeout)
+				if time.Now().After(startTimePlusTimeout) {
+					//	Reboot the machine
+					err = exec.CommandContext(ctx, "reboot").Run()
+					if err != nil {
+						log.Err(err).Msg("Problem rebooting after AP mode timeout exceeded")
+					}
+				}
+			}
+
 		case <-ctx.Done():
 			log.Info().Msg("NetworkStatus check stopping")
 			return

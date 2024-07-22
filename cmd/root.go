@@ -58,7 +58,8 @@ func initConfig() {
 	viper.SetDefault("server.port", 3070)
 	viper.SetDefault("server.allowed-origins", "*")
 	viper.SetDefault("apmode.ssidbase", "iot-wifi-setup")
-	viper.SetDefault("apmode.password", "") // Default to open AP mode
+	viper.SetDefault("apmode.password", "")   // Default to open AP mode
+	viper.SetDefault("apmode.timeout", "10m") // By default, AP will timeout after 10 minutes and reboot
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
