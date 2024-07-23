@@ -123,6 +123,11 @@ func (n *networkManagerService) SetClientWifiConnection(ctx context.Context, SSI
 // StartAPMode starts the device in AP mode so other nearby devices can discover it.  The access point that
 // is created uses the ssid as the access point name.  If the passphrase is blank, an open AP is created
 func (n *networkManagerService) StartAPMode(ctx context.Context, ssid, passphrase string) error {
+	//	Adjust SSID to have a random 4 digit suffix:
+	suffix := GenerateRandomString(4)
+	ssid = fmt.Sprintf("%s_%s", ssid, suffix)
+
+	//	See if we have a passphrase or not
 	if strings.TrimSpace(passphrase) == "" {
 		//	Start an AP without a password:
 		//	sudo nmcli connection add type wifi con-name open-hotspot autoconnect no wifi.mode ap wifi.ssid "SuperOpenPidy" ipv4.method shared ipv6.method shared
