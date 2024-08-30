@@ -16,3 +16,12 @@ Install the package
 ```
 sudo apt install iot-wifi-setup
 ```
+
+### Using 
+Access the service using port `3070` by default.  
+
+There is both an API for iot-wifi-setup so you can integrate with various app types (documentation: `http://<yourmachine>:3070/swagger`)
+![swagger ui](swagger-ui.png)
+
+and a simple web based UI located at `http://<yourmachine>:3070/`
+![web based ui](setup-ui.png)
